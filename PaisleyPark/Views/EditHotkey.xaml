@@ -1,0 +1,32 @@
+﻿<Window x:Class="PaisleyPark.Views.EditHotkey"
+        x:Name="NewHotkeyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        xmlns:p="clr-namespace:PaisleyPark.Common"
+        p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="Edit Hotkey" 
+        Height="235" 
+        Width="300" 
+        SizeToContent="Height"
+        ResizeMode="NoResize">
+    <StackPanel Margin="10">
+        <Label Content="Name" FontWeight="Bold" />
+        <TextBox Text="{Binding Path=Name}" Padding="0,2" />
+        <Label Content="Hotkey" FontWeight="Bold" />
+        <ComboBox Name="hotkeySelection" SelectedIndex="{Binding Path=Hotkey}" Padding="0,2" Margin="0,5"/>
+        <Label Content="Preset" FontWeight="Bold" />
+        <ComboBox Name="presetSelection" SelectedItem="{Binding Path=Preset}" Padding="0,2" Margin="0,5" IsReadOnly="True" />
+        <DockPanel>
+            <Button Content="Cancel" Padding="20,2" 
+                    Command="{Binding Path=CancelCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=NewHotkeyWindow, Mode=OneWay}" />
+            <Button Content="OK" HorizontalAlignment="Right" Padding="20,2" 
+                    Command="{Binding Path=OKCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=NewHotkeyWindow, Mode=OneWay}" />
+        </DockPanel>
+    </StackPanel>
+</Window>

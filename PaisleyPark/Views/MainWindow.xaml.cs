@@ -1,4 +1,9 @@
-﻿using System.Windows;
+﻿using PaisleyPark.Models;
+using PaisleyPark.ViewModels;
+using Prism.Events;
+using System;
+using System.Windows;
+using System.Windows.Forms;
 
 namespace PaisleyPark.Views
 {

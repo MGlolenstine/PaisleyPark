@@ -64,9 +64,13 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PaisleyPark.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -94,21 +98,34 @@
     <Compile Include="Common\ProgressUpdate.cs" />
     <Compile Include="Common\WaymarkEvent.cs" />
     <Compile Include="Common\WaymarkNancyModule.cs" />
+    <Compile Include="Models\Hotkey.cs" />
     <Compile Include="Models\Memory.cs" />
     <Compile Include="Models\Offsets.cs" />
     <Compile Include="Models\Preset.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Waymark.cs" />
+    <Compile Include="Common\Hotkeys.cs" />
+    <Compile Include="Common\HotKeyHelper.cs" />
+    <Compile Include="ViewModels\EditHotkeyViewModel.cs" />
     <Compile Include="ViewModels\EditPresetViewModel.cs" />
+    <Compile Include="ViewModels\HotkeyManagerViewModel.cs" />
+    <Compile Include="ViewModels\ImportHotkeyViewModel.cs" />
     <Compile Include="ViewModels\ImportViewModel.cs" />
+    <Compile Include="ViewModels\NewHotkeyViewModel.cs" />
     <Compile Include="ViewModels\NewPresetViewModel.cs" />
     <Compile Include="ViewModels\PresetManagerViewModel.cs" />
     <Compile Include="ViewModels\ProcessSelectorViewModel.cs" />
+    <Compile Include="Views\EditHotkey.xaml.cs">
+      <DependentUpon>EditHotkey.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\EditPreset.xaml.cs">
       <DependentUpon>EditPreset.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Import.xaml.cs">
       <DependentUpon>Import.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewHotkey.xaml.cs">
+      <DependentUpon>NewHotkey.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NewPreset.xaml.cs">
       <DependentUpon>NewPreset.xaml</DependentUpon>
@@ -119,6 +136,13 @@
     <Compile Include="Views\ProcessSelector.xaml.cs">
       <DependentUpon>ProcessSelector.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\HotkeyManager.xaml.cs">
+      <DependentUpon>HotkeyManager.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Views\EditHotkey.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\EditPreset.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -143,6 +167,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\NewHotkey.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\NewPreset.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -152,6 +180,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ProcessSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HotkeyManager.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

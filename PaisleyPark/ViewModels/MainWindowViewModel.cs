@@ -1,6 +1,5 @@
 using Nancy.Hosting.Self;
 using Newtonsoft.Json;
-using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
 using PaisleyPark.Common;
@@ -38,6 +37,7 @@ namespace PaisleyPark.ViewModels
 		private Offsets Offsets;
 		private readonly Version CurrentVersion;
 		private string GameVersion;
+
 		public string DiscordUri { get; private set; } = "https://discord.gg/hq3DnBa";
 		private static readonly Uri OffsetUrl = new Uri("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Offsets/");
 
@@ -50,9 +50,11 @@ namespace PaisleyPark.ViewModels
 #pragma warning restore IDE1006 // Naming Styles
 
 		public DelegateCommand ManagePreset { get; private set; }
-		public DelegateCommand LoadPresetCommand { get; private set; }
+		public DelegateCommand<Preset> LoadPresetCommand { get; private set; }
+		public DelegateCommand LoadHotkeysCommand { get; private set; }
 		public DelegateCommand ManagePresetsCommand { get; private set; }
 		public DelegateCommand ClosingCommand { get; private set; }
+		public DelegateCommand WindowLoaded { get; private set; }
 		public DelegateCommand StartServerCommand { get; private set; }
 		public DelegateCommand StopServerCommand { get; private set; }
 		public DelegateCommand DiscordCommand { get; private set; }
@@ -206,8 +208,10 @@ namespace PaisleyPark.ViewModels
 			try
 			{
 				// Create the commands.
-				LoadPresetCommand = new DelegateCommand(LoadPreset);
+				LoadPresetCommand = new DelegateCommand<Preset>(LoadPreset);
+				LoadHotkeysCommand = new DelegateCommand(LoadHotkeys);
 				ClosingCommand = new DelegateCommand(OnClose);
+				WindowLoaded = new DelegateCommand(RegisterHotkeys);
 				ManagePresetsCommand = new DelegateCommand(OnManagePresets);
 				StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
 				StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
@@ -250,7 +254,6 @@ namespace PaisleyPark.ViewModels
 			// Check autostart and start the HTTP server if it's true.
 			if (UserSettings.HTTPAutoStart)
 				OnStartServer();
-
 			return true;
 		}
 
@@ -357,7 +360,7 @@ namespace PaisleyPark.ViewModels
 				// Launch the web browser to the latest release.
 				if (result == MessageBoxResult.Yes)
 				{
-					Process.Start("https://github.com/LeonBlade/PaisleyPark/releases/latest");
+					Process.Start("https://github.com/MGlolenstine/PaisleyPark/releases/latest");
 				}
 			}
 		}
@@ -700,9 +703,43 @@ namespace PaisleyPark.ViewModels
 		}
 
 		/// <summary>
+		/// Loads the Hotkey editor.
+		/// </summary>
+		private void LoadHotkeys() {
+			// Create new preset manager window.
+			var win = new HotkeyManager
+			{
+				// Set owner to main window.
+				Owner = Application.Current.MainWindow
+			};
+
+			// Pull view model from window.
+			var vm = win.DataContext as HotkeyManagerViewModel;
+
+			// Populate the hotkeys with our current hotkeys as a new instance.
+			//vm.Hotkeys = new System.Collections.ObjectModel.ObservableCollection<Models.Hotkey>(Settings.Load().Hotkeys);
+
+			// Check if we're saving changes.
+			win.ShowDialog();
+			if (vm.DialogResult == true)
+			{
+				// Reassign presets in user settings to the ones managed by the window.
+				UserSettings.Hotkeys = vm.Hotkeys;
+				// Save the settings.
+				Settings.Save(UserSettings);
+
+				MessageBox.Show("Keybinds will not be updated unless you restart the application!",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+			}
+		}
+
+		/// <summary>
 		/// Loads the preset using our injected function.
 		/// </summary>
-		private void LoadPreset()
+		// TODO: Add keybind load
+		private void LoadPreset(Preset preset = null)
 		{
 			// Ensure that our injection and newmem addresses are set.
 			if (_inject == 0 || _newmem == 0)
@@ -719,7 +756,7 @@ namespace PaisleyPark.ViewModels
 			}
 
 			// Ensure we have a preset selected.
-			if (CurrentPreset == null)
+			if (preset == null)
 				return;
 
 			// Check if user coordinates are all 0.  This likely means that we're still loading into the zone.
@@ -737,7 +774,6 @@ namespace PaisleyPark.ViewModels
 				if (result != MessageBoxResult.Yes)
 					return;
 			}
-
 			// Calls the waymark function for all our waymarks.
 			try
 			{
@@ -749,12 +785,12 @@ namespace PaisleyPark.ViewModels
 
 				WaymarkThread = new Thread(() =>
 				{
-					WriteWaymark(CurrentPreset.A, 0);
-					WriteWaymark(CurrentPreset.B, 1);
-					WriteWaymark(CurrentPreset.C, 2);
-					WriteWaymark(CurrentPreset.D, 3);
-					WriteWaymark(CurrentPreset.One, 4);
-					WriteWaymark(CurrentPreset.Two, 5);
+					WriteWaymark(preset.A, 0);
+					WriteWaymark(preset.B, 1);
+					WriteWaymark(preset.C, 2);
+					WriteWaymark(preset.D, 3);
+					WriteWaymark(preset.One, 4);
+					WriteWaymark(preset.Two, 5);
 				});
 
 				WaymarkThread.Start();
@@ -771,6 +807,30 @@ namespace PaisleyPark.ViewModels
 				OnClose();
 				Application.Current.Shutdown();
 			}
+		}
+
+		private void RegisterHotkeys()
+		{
+			HotKeyHelper _hotKeys = new HotKeyHelper(Application.Current.MainWindow, HandleHotKey);
+			GetHotkeys(_hotKeys);
+		}
+
+		private void GetHotkeys(HotKeyHelper hkh)
+		{
+			foreach (Models.Hotkey hk in Settings.Load().Hotkeys)
+			{
+				hkh.ListenForHotKey(new Hotkey(hk.Key, HotKeyModifiers.None, ShowPreset, hk.preset));
+			}
+		}
+
+		private void ShowPreset(Preset preset)
+		{
+			logger.Info("Showing preset: " + preset.Name);
+			LoadPreset(preset);
+		}
+
+		void HandleHotKey(int keyId)
+		{
 		}
 
 		/// <summary>
@@ -797,7 +857,7 @@ namespace PaisleyPark.ViewModels
 			catch (Exception ex)
 			{
 				logger.Error(ex, "Could not start Nancy host.");
-				MessageBox.Show($"Could not start the HTTP server on port {UserSettings.Port}!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				System.Windows.MessageBox.Show($"Could not start the HTTP server on port {UserSettings.Port}!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
@@ -823,6 +883,7 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// Click to manage the presets.
 		/// </summary>
+		// TODO: Add keybinds in the presets
 		private void OnManagePresets()
 		{
 			// Create new preset manager window.

@@ -64,6 +64,11 @@ namespace PaisleyPark.Models
 		public ObservableCollection<Preset> Presets { get; set; } = new ObservableCollection<Preset>();
 
 		/// <summary>
+		/// List of hotkeys to be saved to the file.
+		/// </summary>
+		public ObservableCollection<Hotkey> Hotkeys { get; set; } = new ObservableCollection<Hotkey>();
+
+		/// <summary>
 		/// Class logger.
 		/// </summary>
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();

@@ -19,8 +19,9 @@ namespace PaisleyPark.ViewModels
         public ICommand RefreshCommand { get; private set; }
         public ICommand OKCommand { get; private set; }
         public ICommand SwitchCommand { get; private set; }
-		public ICommand ManageCommand { get; private set; }
-		public ICommand ClosingCommand { get; private set; }
+		public ICommand ManagePresetsCommand { get; private set; }
+        public ICommand ManageHotkeysCommand { get; private set; }
+        public ICommand ClosingCommand { get; private set; }
         public bool? DialogResult { get; set; }
 
         public ProcessSelectorViewModel()
@@ -28,8 +29,9 @@ namespace PaisleyPark.ViewModels
             RefreshCommand = new DelegateCommand(OnRefresh);
             OKCommand = new DelegateCommand<Window>(OnOK);
             SwitchCommand = new DelegateCommand(OnSwitch);
-			ManageCommand = new DelegateCommand(OnManage);
-			ClosingCommand = new DelegateCommand(OnClose);
+			ManagePresetsCommand = new DelegateCommand(OnPresetManage);
+            ManageHotkeysCommand = new DelegateCommand(OnHotkeyManage);
+            ClosingCommand = new DelegateCommand(OnClose);
 		}
 
         private void OnRefresh()
@@ -56,7 +58,7 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// Opens the preset manager to import/export when game isn't open.
 		/// </summary>
-		private void OnManage()
+		private void OnPresetManage()
 		{
 			var settings = Settings.Load();
 
@@ -79,10 +81,36 @@ namespace PaisleyPark.ViewModels
 			}
 		}
 
-		/// <summary>
-		/// When the window is closed.
+        /// <summary>
+		/// Opens the hotkey manager to import/export when game isn't open.
 		/// </summary>
-		private void OnClose()
+        private void OnHotkeyManage()
+        {
+            var settings = Settings.Load();
+
+            // Create new preset manager window.
+            var win = new PresetManager();
+
+            // Pull view model from window.
+            var vm = win.DataContext as HotkeyManagerViewModel;
+
+            // Populate the presets with our current presets as a new instance.
+            //vm.Hotkeys = new ObservableCollection<Models.Hotkey>(settings.Hotkeys);
+
+            // Check if we're saving changes.
+            if (win.ShowDialog() == true)
+            {
+                // Reassign presets in user settings to the ones managed by the window.
+                settings.Hotkeys = vm.Hotkeys;
+                // Save the settings.
+                Settings.Save(UserSettings);
+            }
+        }
+
+        /// <summary>
+        /// When the window is closed.
+        /// </summary>
+        private void OnClose()
 		{
 //			Settings.Save(UserSetin)
 		}
